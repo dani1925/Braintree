@@ -6,6 +6,8 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var successRouter = require('./routes/success');
+var transactionErrorRouter = require('./routes/transaction-error.js');
 
 var app = express();
 
@@ -23,6 +25,8 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 const checkout = require('./routes/checkout');
 app.use('/checkout', checkout);
+app.use('/success', successRouter);
+app.use('/transaction-error', transactionErrorRouter);
 
 
 // catch 404 and forward to error handler

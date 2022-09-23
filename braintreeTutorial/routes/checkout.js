@@ -5,6 +5,7 @@ const braintree = require('braintree');
 
 
 router.post('/', (req, res, next) => {
+  
   const gateway = new braintree.BraintreeGateway({
     environment: braintree.Environment.Sandbox,
     // Use your own credentials from the sandbox Control Panel here
@@ -17,7 +18,7 @@ router.post('/', (req, res, next) => {
   const nonceFromTheClient = req.body.paymentMethodNonce;
   // Create a new transaction for $10
   const newTransaction = gateway.transaction.sale({
-    amount: '10.00',
+    amount: req.body.amount,
     paymentMethodNonce: nonceFromTheClient,
     options: {
       // This option requests the funds from the transaction
@@ -25,12 +26,12 @@ router.post('/', (req, res, next) => {
       submitForSettlement: true
     }
   }, (error, result) => {
-        console.log('procesar pago');
-        console.dir(result);
       if (result) {
         res.send(result);
+        return 400;
       } else {
         res.status(500).send(error);
+        return 500;
       }
   });
 });

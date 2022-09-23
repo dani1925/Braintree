@@ -1,10 +1,17 @@
 <div id="dropin-wrapper">
   <div id="checkout-message"></div>
   <div id="dropin-container"></div>
-  <button id="submit-button">Submit payment</button>
+  <button id="submit-button" class="pdc-submit-button">Procesar Pago</button>
 </div>
+
 <script>
   var button = document.querySelector('#submit-button');
+
+  const params = new Proxy(new URLSearchParams(window.location.search), {
+    get: (searchParams, prop) => searchParams.get(prop),
+  });
+  
+  let amount = `${params.amount}`;
 
   braintree.dropin.create({
     // Insert your tokenization key here
@@ -18,15 +25,17 @@
         $.ajax({
           type: 'POST',
           url: '/checkout',
-          data: {'paymentMethodNonce': payload.nonce}
+          data: {
+            'paymentMethodNonce': payload.nonce,
+            'amount': amount
+            }
         }).done(function(result) {
           // Tear down the Drop-in UI
-          console.dir(result.success);
           instance.teardown(function (teardownErr) {
             if (teardownErr) {
-              console.error('Could not tear down Drop-in UI!');
+              console.error('No se pudo procesar el pago');
             } else {
-              console.info('Drop-in UI has been torn down!');
+              console.info('Cargo procesado');
               // Remove the 'Submit payment' button
               $('#submit-button').remove();
             }
@@ -34,10 +43,15 @@
 
           if (result.success) {
             
-            $('#checkout-message').html('<h1>Success</h1><p>Your Drop-in UI is working! Check your <a href="https://sandbox.braintreegateway.com/login">sandbox Control Panel</a> for your test transactions.</p><p>Refresh to try another transaction.</p>');
+            $('#checkout-message')
+            .html('<h1>Aprobado</h1><p>Por favor regrese a la página anterior para poder ver reflejado su saldo.</p>');
+            window.location = '/success';
+            return 'holi';
           } else {
             console.log(result);
-            $('#checkout-message').html('<h1>Error</h1><p>Check your console.</p>');
+            $('#checkout-message')
+            .html('<h1>Error</h1><p>Por favor regrese a la página anterior e intente de nuevo.</p>');
+            window.location = '/transaction-error';
           }
         });
       });
